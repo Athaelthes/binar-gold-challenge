@@ -13,7 +13,7 @@ from flasgger import swag_from
 
 app = Flask(__name__)
 
-app.json = LazyJSONEncoder
+app.json_encoder = LazyJSONEncoder
 swagger_template = dict(
 info = {
     'title': LazyString(lambda: 'Challenge: Membuat API untuk Cleansing Data dan Laporan Analisis Data'),
@@ -28,7 +28,7 @@ swagger_config = {
     "specs": [
         {
             "endpoint": 'docs',
-            "route": '/docs.json',
+            "route": '/docs.json'
         }
     ],
     "static_url_path": "/flasgger_static",
@@ -37,9 +37,9 @@ swagger_config = {
 }
 swagger = Swagger(app, template=swagger_template, config=swagger_config)
 
-@swag_from("docs/text_processing.yml", methods=['POST'])
-@app.route('/Teks via Form', methods=['POST'])
-def text_processing():
+@swag_from("docs/text.yml", methods=['POST'])
+@app.route('/text', methods=['POST'])
+def text():
     
     text_input = request.form.get('text')
     text_output = clean_tweet(text_input)
@@ -52,23 +52,23 @@ def text_processing():
     response_data = jsonify(json_response)
     return response_data
 
-@swag_from("docs/file_processing.yml", methods=['POST'])
-@app.route('/Upload File CSV', methods=['POST'])
-def file_processing():
+@swag_from("docs/file.yml", methods=['POST'])
+@app.route('/file', methods=['POST'])
+def file():
     
-    file = request.files('file')
-    df_csv = pd.read_csv(file, encoding="latin-1")
-    df_csv = df_csv['Tweet Hate and Abuse Speech']
-    df_csv = df_csv.drop_duplicates()
+    file = request.files['file']
+    txt = pd.read_csv(file, encoding="latin-1")
+    txt = txt['Tweet']
+    txt = txt.drop_duplicates()
 
-    df_csv = df_csv.values.tolist()
-    i = 0
+    txt = txt.values.tolist()
+    x = 0
     data = {}
-    for text in df_csv:
-        data[i] = {}
-        data[i]['tweet'] = text
-        data[i]['cleansing_tweet'] = clean_tweet(text)
-        i = i + 1
+    for text in txt:
+        data[x] = {}
+        data[x]['cleansing_tweet'] = clean_tweet(text)
+        data[x]['tweet'] = text
+        x = x + 1
 
     return data
 
@@ -86,6 +86,7 @@ def symbol(tweet):
     temp = re.sub('[()!?]', ' ', temp)
     temp = re.sub('\[.*?\]',' ', temp)
     temp = re.sub("[^a-z0-9]"," ", temp)
+    temp =  re.sub(r"\\x[A-Za-z0-9./]+", " ",temp)
     temp = temp.split()
     temp = [w for w in temp if not w in sastrawi_stopwords]
     temp = " ".join(word for word in temp)
@@ -104,7 +105,7 @@ y = 'SELECT * FROM abusive'
 read_y = pd.read_sql_query(y, database)
 def normalize(dari_abusive):
     list_word = dari_abusive.split()
-    return ' '.join([s for dari_abusive in list_word if dari_abusive not in read_y])
+    return ' '.join([dari_abusive for dari_abusive in list_word if dari_abusive not in read_y])
 
 def clean_tweet(clean):
     clean = clean.lower()
