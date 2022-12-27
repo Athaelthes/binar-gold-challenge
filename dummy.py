@@ -5,39 +5,10 @@ import pandas as pd
 from Sastrawi.StopWordRemover.StopWordRemoverFactory import StopWordRemoverFactory
 from Sastrawi.Stemmer.StemmerFactory import StemmerFactory
 from flask import Flask, jsonify
-
-
 from flask import request
-from flasgger import Swagger, LazyString, LazyJSONEncoder
-from flasgger import swag_from
 
 app = Flask(__name__)
 
-app.json = LazyJSONEncoder
-swagger_template = dict(
-info = {
-    'title': LazyString(lambda: 'Challenge: Membuat API untuk Cleansing Data dan Laporan Analisis Data'),
-    'version': LazyString(lambda: '1.0.0'),
-    'description': LazyString(lambda: 'Dokumentasi API untuk Data Processing dan Modeling'),
-    },
-    host = LazyString(lambda: request.host)
-)
-
-swagger_config = {
-    "headers": [],
-    "specs": [
-        {
-            "endpoint": 'docs',
-            "route": '/docs.json',
-        }
-    ],
-    "static_url_path": "/flasgger_static",
-    "swagger_ui": True,
-    "specs_route": "/docs/"
-}
-swagger = Swagger(app, template=swagger_template, config=swagger_config)
-
-@swag_from("docs/text_processing.yml", methods=['POST'])
 @app.route('/Teks via Form', methods=['POST'])
 def text_processing():
     
@@ -52,7 +23,6 @@ def text_processing():
     response_data = jsonify(json_response)
     return response_data
 
-@swag_from("docs/file_processing.yml", methods=['POST'])
 @app.route('/Upload File CSV', methods=['POST'])
 def file_processing():
     
@@ -71,6 +41,7 @@ def file_processing():
         i = i + 1
 
     return data
+
 
 sastrawi_stopwords = StopWordRemoverFactory().get_stop_words()
 stemmer = StemmerFactory().create_stemmer()
