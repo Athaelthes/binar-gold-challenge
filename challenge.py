@@ -47,6 +47,8 @@ def text():
     json_response = {
         'input' : text_input,
         'output' : text_output,
+        'status_code':200, 
+        'description':'teks berhasil diproses', 
     }  
 
     response_data = jsonify(json_response)
@@ -66,8 +68,8 @@ def file():
     data = {}
     for text in txt:
         data[x] = {}
+        data[x]['normal_tweet'] = text
         data[x]['cleansing_tweet'] = clean_tweet(text)
-        data[x]['tweet'] = text
         x = x + 1
 
     return data
@@ -79,6 +81,10 @@ def symbol(tweet):
     if type(tweet) == np.float:
         return ""
     temp = tweet.lower()
+    temp = re.sub('rt',' ',temp)
+    temp = re.sub('user',' ',temp)
+    temp = re.sub('((www\.[^\s]+)|(https?://[^\s]+)|(http?://[^\s]+))',' ',temp)     
+    temp = re.sub("'", "", temp) 
     temp = re.sub("'", "", temp) 
     temp = re.sub("@[A-Za-z0-9_]+","", temp)
     temp = re.sub("#[A-Za-z0-9_]+","", temp)

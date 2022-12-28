@@ -1,5 +1,5 @@
 tags:
-  - name: Text Processing
+  - name: Text
 get:
   description: Teks yang akan diproses
 parameters:
